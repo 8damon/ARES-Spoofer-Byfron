@@ -64,7 +64,7 @@ namespace TITAN {
         const HRESULT co = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
         const bool needUninit = SUCCEEDED(co);
 
-        // It's fine if someone initialized security already
+        // hmm...
         HRESULT sec = CoInitializeSecurity(
             nullptr, -1, nullptr, nullptr,
             RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
@@ -78,13 +78,13 @@ namespace TITAN {
         (void)primeInitialCount_();
         if (!setupSubscriptions_()) goto Exit;
 
-        // If we start with >0 instances, we're inside a cycle already
+        // if we start with >0 instances, we're inside a cycle already
         if (procCount_.load(std::memory_order_acquire) > 0) {
             armed_.store(true, std::memory_order_release);
         }
 
         while (!stop_.load(std::memory_order_acquire)) {
-            // Handle resync regardless of pause state
+            // handle resync regardless of pause state
             if (resync_.exchange(false, std::memory_order_acq_rel)) {
                 drainPending_();
                 rebaseline_();
@@ -220,10 +220,12 @@ namespace TITAN {
                         vPid.vt == VT_I4) {
                         DWORD pid = static_cast<DWORD>(vPid.intVal);
                         if (isIgnored(pid)) {
-                            // Drop this event completely
+
+                            // drop this event completely
                             VariantClear(&vPid);
                             VariantClear(&vName);
                             VariantClear(&vt);
+
                             return true;
                         }
                     }
@@ -237,7 +239,9 @@ namespace TITAN {
             VariantClear(&vPid);
             VariantClear(&vName);
         }
+
         VariantClear(&vt);
+
         return true;
     }
 
@@ -248,7 +252,7 @@ namespace TITAN {
             for (;;) {
                 ComPtr<IWbemClassObject> ev;
                 ULONG ret = 0;
-                // Non-blocking: 0ms timeout
+                // non-blocking: 0ms timeout
                 HRESULT hr = en->Next(0, 1, ev.ReleaseAndGetAddressOf(), &ret);
                 if (hr != WBEM_S_NO_ERROR || ret == 0) break;
                 any = true;
@@ -256,14 +260,13 @@ namespace TITAN {
             return any;
             };
 
-        // Keep draining until both are empty in the same iteration
+        // keep draining until both are empty in the same iteration
         while (drainOne(startEnum_) | drainOne(stopEnum_)) {
             // loop
         }
     }
 
     void Watchdog::rebaseline_() {
-        // Recompute current count via one-shot query
         int cnt = 0;
         if (services_) {
             wchar_t query[256];
@@ -287,7 +290,6 @@ namespace TITAN {
         }
 
         procCount_.store(cnt, std::memory_order_release);
-        // Arm only if we *currently* have at least one instance
         armed_.store(cnt > 0, std::memory_order_release);
     }
 
@@ -319,4 +321,4 @@ namespace TITAN {
         std::scoped_lock lk(ignoreMutex_);
         return ignorePids_.count(pid) > 0;
     }
-} // namespace TITAN
+}

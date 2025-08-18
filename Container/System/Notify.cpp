@@ -253,7 +253,6 @@ namespace TITAN {
         return true;
     }
 
-    // ---------- Secondary-instance handler: parse titan-notify: URL and signal events ----------
     bool Notification::HandleProtocolIfPresentAndExitEarly() {
         int argc = 0;
         LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -330,6 +329,7 @@ namespace TITAN {
 
         CloseHandle(hYes);
         CloseHandle(hDismiss);
+
         return true;
     }
 }

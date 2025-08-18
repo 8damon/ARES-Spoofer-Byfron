@@ -235,4 +235,4 @@ namespace MAC {
         TsService::SectHeader("MAC Spoofing", 196);
         spoofMac();
     }
-} // namespace MAC
+}

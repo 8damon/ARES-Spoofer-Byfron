@@ -213,7 +213,6 @@ namespace {
                 }
             }
 
-            // Advance
             med.StartFileReferenceNumber = *reinterpret_cast<USN*>(buf.data());
         }
 
@@ -265,7 +264,6 @@ namespace {
                 auto full = ReconstructPath(m.drive, m.parent, dirMap, m.filename);
                 if (!full) continue;
 
-                // Validate to avoid stale entries
                 std::error_code ec;
                 if (!fs::exists(*full, ec) || ec) {
                     diag += L"candidate does not exist: " + *full + L"\n";
@@ -291,11 +289,6 @@ namespace {
         return std::nullopt;
     }
 
-    // =========================
-    // Fallbacks
-    // =========================
-
-    // Use TsService to build typical paths without hardcoding drive letters.
     static std::optional<Pick> FallbackCommon(std::wstring& diag) {
         auto user = TsService::GetUser();
         auto sys = TsService::GetSysDrive();
@@ -391,7 +384,7 @@ namespace {
                         if (p.has_filename() && _wcsicmp(p.filename().c_str(), name) == 0) {
                             return p.wstring();
                         }
-                        // Recurse dirs
+
                         if (it->is_directory(ec) && !ec) {
                             stack.emplace_back(p, depth + 1);
                         }
@@ -417,7 +410,6 @@ namespace {
             return gCache;
         }
 
-        // USN fast path
         if (auto pick = ScanOnceFast(diag)) {
             gCache.valid = true;
             gCache.which = pick->which;
@@ -427,7 +419,6 @@ namespace {
             return gCache;
         }
 
-        // Shortcuts / common installs
         if (auto s = FallbackShortcuts(diag)) {
             gCache.valid = true;
             gCache.which = s->which;
@@ -445,7 +436,6 @@ namespace {
             return gCache;
         }
 
-        // Bounded recursive probe
         if (auto p = FallbackBoundedProbe(diag)) {
             gCache.valid = true;
             gCache.which = p->which;
@@ -455,14 +445,10 @@ namespace {
             return gCache;
         }
 
-        gCache = Cache{}; // none
+        gCache = Cache{};
         diag += L"no candidates found by any method.\n";
         return gCache;
     }
-
-    // =========================
-    // Launch helper
-    // =========================
 
     template <typename OnPid>
     void LaunchSelected(const std::wstring& path, bool passPlayerArg, OnPid onPid) {
@@ -486,15 +472,10 @@ namespace {
             std::wcerr << L"[!] ShellExecuteExW failed (" << e << L"): " << FormatWinErr(e) << L"\n";
         }
     }
-
-} // anonymous namespace
-
+}
 
 namespace Installer {
 
-    // =========================================
-    // EXE path: has Watchdog (ignore our launch)
-    // =========================================
     void Install(TITAN::Watchdog& wd) {
         TsService::SectHeader("Roblox Installation", 203);
 
@@ -518,9 +499,6 @@ namespace Installer {
             });
     }
 
-    // ================================
-    // DLL path: one-shot, no Watchdog
-    // ================================
     void Install() {
         TsService::SectHeader("Roblox Installation (DLL)", 203);
 

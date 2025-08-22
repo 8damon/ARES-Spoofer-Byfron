@@ -1,36 +1,22 @@
+
 #pragma once
 
-#include "../Header/COM.h"
-#include "../Services/Services.hpp"
+#define WIN32_LEAN_AND_MEAN
+#define _WIN32_WINNT 0x0A00
 
 #include <windows.h>
-#include <iphlpapi.h>
-#include <comdef.h>
-#include <Wbemidl.h>
+#include <msxml6.h>
 
-#include <thread>
-#include <mutex>
-#include <vector>
-#include <string>
-#include <optional>
-#include <iostream>
-
-#pragma comment(lib, "wbemuuid.lib")
-#pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "Wlanapi.lib")
+#pragma comment(lib, "Ole32.lib")
+#pragma comment(lib, "OleAut32.lib")
+#pragma comment(lib, "Uuid.lib")
+#pragma comment(lib, "Msxml6.lib")
+#pragma comment(lib, "Iphlpapi.lib")
 
 namespace MAC {
 
-    class MacSpoofer {
-    public:
+    struct MacSpoofer {
         static void run();
-
-    private:
-        static std::wstring GetCurrentSSID();
-        static void bounceAdapter(const std::wstring& adapterName);
-        static std::vector<std::wstring> getAdapters();
-        static std::optional<std::wstring> resAdapter(const std::wstring& adapterName);
-        static std::wstring getAdapterRegPath(const std::wstring& adapterGUID);
-        static void spoofMac();
-        static std::wstring trim(const std::wstring& s);
     };
 }

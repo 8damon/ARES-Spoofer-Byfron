@@ -15,7 +15,7 @@ With Roblox integrating a ban API and combining Hyperion (Byfron's) detection me
 
 High-Level Overview of Roblox's System's in motion 
 
-![Diagram](./Images/RobloxBanSystemProtON.png)
+![Diagram](./Images/TDiagram.png)
 
 ### HOW IT WORKS
 
